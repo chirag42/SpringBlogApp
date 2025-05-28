@@ -4,7 +4,5 @@ import java.util.*;
 
 
 public interface BlogRepositoryInterface {
-    public Blog saveBlog(Blog blog);
-    public List<Blog> getAllBlogs();
-    public List<String> getAuthors();
+
 }

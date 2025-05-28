@@ -3,10 +3,11 @@ package com.example.demo.Controller;
 import com.example.demo.Model.Blog;
 import com.example.demo.Service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
 import java.util.*;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -17,8 +18,9 @@ public class BlogController {
     @Autowired
     private BlogService blogService;
 
-    Map<Long, Blog> blogsCache = new HashMap<>();
-    private AtomicLong blogIdGenerator = new AtomicLong(1);
+
+//    Map<Long, Blog> blogsCache = new HashMap<>();
+//    private AtomicLong blogIdGenerator = new AtomicLong(1);
 
     @PostMapping("/create")
     public ResponseEntity<?> createBlog(@RequestBody Blog blog) {
@@ -44,7 +46,7 @@ public class BlogController {
     }
 
     @GetMapping("/getBlog/{id}")
-    public String getBlogById(@PathVariable Long id) {
+    public String getBlogById(@PathVariable String id) {
 //        Blog blog = blogsCache.get(id);
 //        if(blog == null) return "Blog not found";
 //        return blog.toString();
@@ -65,7 +67,7 @@ public class BlogController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteBlog(@PathVariable Long id) {
+    public ResponseEntity<String> deleteBlog(@PathVariable String id) {
 //        if (blogsCache.containsKey(id)) {
 //            blogsCache.remove(id);
 //            return ResponseEntity.ok("Blog deleted");
@@ -80,6 +82,13 @@ public class BlogController {
     public ResponseEntity<?> getAuthors(){
         List<String> authors = blogService.getAuthors();
         if (!authors.isEmpty()) return ResponseEntity.ok(authors);
+        return ResponseEntity.badRequest().body("No Author Found");
+    }
+
+    @GetMapping("/authors/{name}")
+    public ResponseEntity<?> getAuthors(@PathVariable String name){
+        List<Blog> authorBlog = blogService.findBlogByAuthor(name);
+        if (!authorBlog.isEmpty()) return ResponseEntity.ok(authorBlog);
         return ResponseEntity.badRequest().body("No Author Found");
     }
 
