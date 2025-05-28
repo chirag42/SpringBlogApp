@@ -1,6 +1,8 @@
 package com.example.demo.Controller;
 
 import com.example.demo.Model.Blog;
+import com.example.demo.Service.BlogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -12,53 +14,73 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequestMapping("/blogs")
 public class BlogController {
 
+    @Autowired
+    private BlogService blogService;
+
     Map<Long, Blog> blogsCache = new HashMap<>();
     private AtomicLong blogIdGenerator = new AtomicLong(1);
 
     @PostMapping("/create")
-    public ResponseEntity<String> createBlog(@RequestBody Blog blog) {
+    public ResponseEntity<?> createBlog(@RequestBody Blog blog) {
         System.out.println(blog.getAuthor());
-        long id = blogIdGenerator.getAndIncrement();
-        blog.setId(id);
-        blogsCache.put(id, blog);
-        return ResponseEntity.ok("Blog created");
+        try {
+            Blog saved = blogService.createBlogService(blog);
+            return ResponseEntity.ok(saved);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+//        long id = blogIdGenerator.getAndIncrement();
+//        blog.setId(id);
+//        blogsCache.put(id, blog);
+//        return ResponseEntity.ok("Blog created");
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String> updateBlog(@RequestBody Blog blog) {
-        long id = blog.getId();
-        if (blogsCache.containsKey(id)) {
-            for(String content : blog.getContent()){
-                blogsCache.get(id).getContent().add(content);
-            }
-            return ResponseEntity.ok("Blog updated");
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Blog> updateBlog(@RequestBody Blog blog) {
+        Blog updatedBlog = blogService.updateBlog(blog);
+        if (updatedBlog != null) return ResponseEntity.ok(updatedBlog);
+        return ResponseEntity.badRequest().body(updatedBlog);
+
     }
 
     @GetMapping("/getBlog/{id}")
     public String getBlogById(@PathVariable Long id) {
-        Blog blog = blogsCache.get(id);
-        if(blog == null) return "Blog not found";
-        return blog.toString();
-
-
+//        Blog blog = blogsCache.get(id);
+//        if(blog == null) return "Blog not found";
+//        return blog.toString();
+        Blog blog = blogService.getBlogById(id);
+        if (blog != null) {
+            return blog.toString();
+        }
+        return "Blog Not Found";
     }
 
     @GetMapping("/allBlogs")
-    public ResponseEntity<List<Blog>> getAllBlogs() {
-        List<Blog> blogs = blogsCache.values().stream().toList();
-        return ResponseEntity.ok(blogs);
+    public ResponseEntity<?> getAllBlogs() {
+//        List<Blog> blogs = blogsCache.values().stream().toList();
+//        return ResponseEntity.ok(blogs);
+        List<Blog> allBlogs = blogService.getAllBlogs();
+        if (!allBlogs.isEmpty())  return ResponseEntity.ok(blogService.getAllBlogs());
+        return ResponseEntity.badRequest().body("No Blogs Found");
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteBlog(@PathVariable Long id) {
-        if (blogsCache.containsKey(id)) {
-            blogsCache.remove(id);
-            return ResponseEntity.ok("Blog deleted");
-        }
-        return ResponseEntity.notFound().build();
+//        if (blogsCache.containsKey(id)) {
+//            blogsCache.remove(id);
+//            return ResponseEntity.ok("Blog deleted");
+//        }
+//        return ResponseEntity.notFound().build();
+        boolean deleted = blogService.removeBlog(id);
+        if(deleted)  return ResponseEntity.ok("Blog deleted");
+        else return ResponseEntity.badRequest().body("Blog Not Found");
     }
 
+    @GetMapping("/authors")
+    public ResponseEntity<?> getAuthors(){
+        List<String> authors = blogService.getAuthors();
+        if (!authors.isEmpty()) return ResponseEntity.ok(authors);
+        return ResponseEntity.badRequest().body("No Author Found");
+    }
 
 }

@@ -1,9 +1,7 @@
 package com.example.demo.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.util.*;
 
@@ -11,8 +9,11 @@ import java.util.*;
 @Entity
 public class Blog {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String author;
+
     @ElementCollection
     private List<String> content;
 
