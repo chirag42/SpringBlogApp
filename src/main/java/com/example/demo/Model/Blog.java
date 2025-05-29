@@ -1,25 +1,28 @@
 package com.example.demo.Model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Document
 public class Blog {
     @Id
-    private String id;
+    private ObjectId id;
 
     private String author;
 
     private List<String> content;
 
-    public String getId() {
+    private LocalDateTime publishDate;
+
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 
@@ -37,6 +40,14 @@ public class Blog {
 
     public void setContent(List<String> content) {
         this.content = content;
+    }
+
+    public LocalDateTime getPublishDate() {
+        return publishDate;
+    }
+
+    public void setPublishDate(LocalDateTime publishDate) {
+        this.publishDate = publishDate;
     }
 
     @Override

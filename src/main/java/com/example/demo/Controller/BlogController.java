@@ -2,8 +2,10 @@ package com.example.demo.Controller;
 
 import com.example.demo.Model.Blog;
 import com.example.demo.Service.BlogService;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
@@ -23,13 +25,13 @@ public class BlogController {
 //    private AtomicLong blogIdGenerator = new AtomicLong(1);
 
     @PostMapping("/create")
-    public ResponseEntity<?> createBlog(@RequestBody Blog blog) {
+    public ResponseEntity<Blog> createBlog(@RequestBody Blog blog) {
         System.out.println(blog.getAuthor());
         try {
             Blog saved = blogService.createBlogService(blog);
-            return ResponseEntity.ok(saved);
+            return new ResponseEntity<>(saved, HttpStatus.OK);
         }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 //        long id = blogIdGenerator.getAndIncrement();
 //        blog.setId(id);
@@ -42,19 +44,18 @@ public class BlogController {
         Blog updatedBlog = blogService.updateBlog(blog);
         if (updatedBlog != null) return ResponseEntity.ok(updatedBlog);
         return ResponseEntity.badRequest().body(updatedBlog);
-
     }
 
     @GetMapping("/getBlog/{id}")
-    public String getBlogById(@PathVariable String id) {
+    public ResponseEntity<Blog> getBlogById(@PathVariable ObjectId id) {
 //        Blog blog = blogsCache.get(id);
 //        if(blog == null) return "Blog not found";
 //        return blog.toString();
         Blog blog = blogService.getBlogById(id);
         if (blog != null) {
-            return blog.toString();
+            return new ResponseEntity<>(blog, HttpStatus.OK);
         }
-        return "Blog Not Found";
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/allBlogs")
@@ -67,14 +68,14 @@ public class BlogController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteBlog(@PathVariable String id) {
+    public ResponseEntity<String> deleteBlog(@PathVariable ObjectId id) {
 //        if (blogsCache.containsKey(id)) {
 //            blogsCache.remove(id);
 //            return ResponseEntity.ok("Blog deleted");
 //        }
 //        return ResponseEntity.notFound().build();
         boolean deleted = blogService.removeBlog(id);
-        if(deleted)  return ResponseEntity.ok("Blog deleted");
+        if(deleted)  return ResponseEntity.noContent().build();
         else return ResponseEntity.badRequest().body("Blog Not Found");
     }
 

@@ -2,6 +2,7 @@ package com.example.demo.Service;
 
 import com.example.demo.Model.Blog;
 import com.example.demo.Repository.BlogRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,16 +29,17 @@ public class BlogService {
         if (blog.getAuthor() == null) {
             throw new IllegalArgumentException("Author is required");
         }
+        blog.setPublishDate(LocalDateTime.now());
         return blogRepository.save(blog);
     }
 
-    public boolean removeBlog(String id) {
+    public boolean removeBlog(ObjectId id) {
         if (!blogRepository.existsById(id)) return false;
         blogRepository.deleteById(id);
         return true;
     }
 
-    public Blog getBlogById(String id) {
+    public Blog getBlogById(ObjectId id) {
         Optional<Blog> blog = blogRepository.findById(id);
         return blog.orElse(null);
     }
@@ -44,9 +47,12 @@ public class BlogService {
     public Blog updateBlog(Blog blog) {
         Blog blogFromDB = getBlogById(blog.getId());
         if (blogFromDB != null) {
+            blogFromDB.setAuthor(blog.getAuthor() != null && !blog.getAuthor().isEmpty() ? blog.getAuthor() : blogFromDB.getAuthor());
             List<String> updatedContent = new ArrayList<>();
-            for (String content : blog.getContent()) {
-                blogFromDB.getContent().add(content);
+            if (blog.getContent() != null) {
+                for (String content : blog.getContent()) {
+                    blogFromDB.getContent().add(content);
+                }
             }
             blogRepository.save(blogFromDB);
         }
