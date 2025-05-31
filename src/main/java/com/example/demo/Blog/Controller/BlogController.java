@@ -21,11 +21,11 @@ public class BlogController {
 //    Map<Long, Blog> blogsCache = new HashMap<>();
 //    private AtomicLong blogIdGenerator = new AtomicLong(1);
 
-    @PostMapping("/create")
-    public ResponseEntity<Blog> createBlog(@RequestBody Blog blog) {
+    @PostMapping("/create/{username}")
+    public ResponseEntity<Blog> createBlog(@RequestBody Blog blog, @PathVariable String username) {
         System.out.println(blog.getTitle());
         try {
-            Blog saved = blogService.createBlogService(blog);
+            Blog saved = blogService.createBlogService(blog, username);
             return new ResponseEntity<>(saved, HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
