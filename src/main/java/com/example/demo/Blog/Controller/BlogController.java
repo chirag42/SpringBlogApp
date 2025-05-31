@@ -1,16 +1,13 @@
-package com.example.demo.Controller;
+package com.example.demo.Blog.Controller;
 
-import com.example.demo.Model.Blog;
-import com.example.demo.Service.BlogService;
+import com.example.demo.Blog.Model.Blog;
+import com.example.demo.Blog.Service.BlogService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 
 @RestController
@@ -26,7 +23,7 @@ public class BlogController {
 
     @PostMapping("/create")
     public ResponseEntity<Blog> createBlog(@RequestBody Blog blog) {
-        System.out.println(blog.getAuthor());
+        System.out.println(blog.getTitle());
         try {
             Blog saved = blogService.createBlogService(blog);
             return new ResponseEntity<>(saved, HttpStatus.OK);

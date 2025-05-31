@@ -1,13 +1,12 @@
-package com.example.demo.Service;
+package com.example.demo.Blog.Service;
 
-import com.example.demo.Model.Blog;
-import com.example.demo.Repository.BlogRepository;
+import com.example.demo.Blog.Model.Blog;
+import com.example.demo.Blog.Repository.BlogRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,8 +25,8 @@ public class BlogService {
     private MongoTemplate mongoTemplate;
 
     public Blog createBlogService(Blog blog) {
-        if (blog.getAuthor() == null) {
-            throw new IllegalArgumentException("Author is required");
+        if (blog.getTitle().isEmpty()) {
+            throw new IllegalArgumentException("Title is required");
         }
         blog.setPublishDate(LocalDateTime.now());
         return blogRepository.save(blog);
@@ -47,7 +46,7 @@ public class BlogService {
     public Blog updateBlog(Blog blog) {
         Blog blogFromDB = getBlogById(blog.getId());
         if (blogFromDB != null) {
-            blogFromDB.setAuthor(blog.getAuthor() != null && !blog.getAuthor().isEmpty() ? blog.getAuthor() : blogFromDB.getAuthor());
+            blogFromDB.setTitle(!blog.getTitle().isEmpty() ? blog.getTitle() : blogFromDB.getTitle());
             List<String> updatedContent = new ArrayList<>();
             if (blog.getContent() != null) {
                 for (String content : blog.getContent()) {
@@ -61,8 +60,8 @@ public class BlogService {
 
     public List<String> getAuthors() {
         List<Blog> allBlogs =  blogRepository.findAll();
-        return allBlogs.stream().map(Blog::getAuthor).distinct().
-                collect(Collectors.toList());
+        return allBlogs.stream().map(Blog::getTitle).distinct()
+                .collect(Collectors.toList());
     }
 
     public List<Blog> getAllBlogs() {
@@ -71,8 +70,7 @@ public class BlogService {
 
     public List<Blog> findBlogByAuthor(String author) {
         //return blogRepository.findByAuthor(author);
-        Query query = new Query(Criteria.where("author").is(author));
+        Query query = new Query(Criteria.where("title").is(author));
         return mongoTemplate.find(query, Blog.class);
-
     }
 }
